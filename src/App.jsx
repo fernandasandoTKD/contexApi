@@ -1,16 +1,52 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 import { AppRouter } from './routing/AppRouter'
+import { Context } from './context/Context'
+import { useEffect } from 'react'
 
 function App() {
-  const [count, setCount] = useState(0)
+ // Aca envio lo que quiero que va a comunicar a los demaás componentes.
+
+ const [user, setUser] = useState(() => {
+  
+  const storedUser = localStorage.getItem("user");
+
+  return storedUser ? JSON.parse(storedUser) : {};
+
+  });
+
+    // Inicializar el estado del modo oscuro con el valor que tenga en el localStorage si existe
+    const [isDarkMode, setIsDarkMode] = useState(() => {
+      const darkMode = JSON.parse(localStorage.getItem('darkMode'));
+      return darkMode || false;
+    });
+
+    useEffect(() => {
+      localStorage.setItem("user", JSON.stringify(user));
+    }, [user]);
+  
+    // useEffect que se ejecuta cada vez que cambia el estado del modo oscuro
+    useEffect(() => {
+      localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
+      document.body.classList.toggle('darkMode', isDarkMode);
+    }, [isDarkMode]);
+  
+    // Método para alternar el modo oscuro
+    const toggleDarkMode = () => {
+      setIsDarkMode(prevMode => !prevMode);
+    };
 
   return (
-    <div>
+    <Context.Provider value={{
+      user,
+      setUser,
+      isDarkMode,
+      toggleDarkMode
+    }}>
+      <div className='App'>
         <AppRouter/>
     </div>
+    </Context.Provider>
   )
 }
 
